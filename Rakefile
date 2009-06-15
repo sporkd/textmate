@@ -3,11 +3,11 @@ require 'rake/gempackagetask'
 require 'date'
 
 GEM = "textmate"
-GEM_VERSION = "0.9.3"
+GEM_VERSION = "0.9.4"
 AUTHOR = "Yehuda Katz"
 EMAIL = "wycats@gmail.com"
 HOMEPAGE = "http://yehudakatz.com"
-SUMMARY = "Command-line textmate package manager"
+SUMMARY = "Command-line textmate package manager (minor additions by ddollar)"
 
 spec = Gem::Specification.new do |s|
   s.name = GEM
