@@ -1,236 +1,89 @@
 #!/usr/bin/env ruby
 
-require "fileutils"
-require "rubygems"
-require "thor"
-require "open-uri"
-require "yaml"
+require 'thor'
+
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+require 'textmate'
 
 class TextmateInstaller < Thor
-  
-  # CHANGED: renamed list to remote. Could there be a better name?
+
   desc "search [SEARCH]", "Lists all the matching remote bundles"
-  def search(search_term = "")
-    search_term = Regexp.new(".*#{search_term}.*", "i")
-    
-    remote_bundle_locations.keys.map { |key| key.to_s }.sort.each do |name|
-      location = remote_bundle_locations[name.to_sym]
-      puts "\n" << name.to_s << " Remote Bundles\n" << name.to_s.gsub(/./,'-') << '---------------'
-      
-      results = case location[:scm]
-                when :svn
-                  %x[svn list #{e_sh location[:url]}].select {|x| x =~ search_term}.map do |result|
-                    "%s - %s" % [
-                      result.split('.').first,
-                      "#{location[:url]}/#{result.chomp}"
-                    ]
-                  end.join("\n")
-                when :git
-                  'git remotes not implemented yet'
-                when :github
-                  find_github_bundles(search_term).map {|result|
-                    "%s - %s" %
-                    [
-                      normalize_github_repo_name(result['name']).split('.').first,
-                      git_url_from_github_result(result)
-                    ]
-                  }
-                end
-      
-      puts results
-    end
+  def search(search = "")
+    display_hash remote.bundles(search)
   end
-  
+
   desc "list [SEARCH]", "lists all the bundles installed locally"
-  def list(search_term = "")
-    search_term = Regexp.new(".*#{search_term}.*", "i")
-    
-    local_bundle_paths.each do |name,bundles_path|
-      puts "\n" << name.to_s << " Bundles\n" << name.to_s.gsub(/./,'-') << '--------'
-      puts Dir["#{e_sh bundles_path}/*.tmbundle"].map {|x| x.split("/").last.split(".").first}.
-        select {|x| x =~ search_term}.join("\n")
-    end
+  def list(search = "")
+    display_hash local.bundles(search)
   end
-  
+
   desc "install NAME [SOURCE]", "install a bundle"
-  def install(bundle_name, remote_bundle_location_name=nil)
-    FileUtils.mkdir_p install_bundles_path
-    puts "Checking out #{bundle_name}..."
+  def install(bundle)
+    remotes = remote.bundles(bundle)
     
-    # CHANGED: It's faster to just try and fail for each repo than to search them all first
-    installed=false
-    remote_bundle_locations.each do |remote_name,location|
-      next unless remote_name.to_s.downcase.include? remote_bundle_location_name.to_s.downcase if remote_bundle_location_name
-      
-      cmd = case location[:scm]
-            when :git
-              'echo "git remotes not implemented yet"'
-            when :svn
-              %[svn co #{e_sh location[:url]}/#{e_sh bundle_name}.tmbundle #{e_sh install_bundles_path}/#{e_sh bundle_name}.tmbundle 2>&1]
-            when :github
-              repos = find_github_bundles(denormalize_github_repo_name(bundle_name))
-              
-              # Handle possible multiple Repos with the same name
-              case repos.size
-              when 0
-                'echo "Sorry, no such bundle found"'
-              when 1
-                %[git clone git://github.com/#{repos.first['username']}/#{repos.first['name']}.git #{e_sh install_bundles_path}/#{e_sh bundle_name}.tmbundle 2>&1]
-              else
-                puts "Multiple bundles with that name found. Please choose which one you want to install:"
-                repos.each_with_index {|repo, idx|
-                  puts "%d: %s by %s" %
-                  [
-                    idx + 1,
-                    normalize_github_repo_name(repo['name']),
-                    repo['username']
-                  ]
-                }
-                print "Your choice: "
-                
-                # Since to_i defaults to 0, we have to use Integer
-                choice = Integer(STDIN.gets.chomp) rescue nil
-                until choice && (0...repos.size).include?( choice - 1 ) do
-                  print "Sorry, invalid choice. Please enter a valid number or Ctrl+C to stop: "
-                  choice = Integer(STDIN.gets.chomp) rescue nil
-                end
-                
-                %[git clone git://github.com/#{repos[choice - 1]['username']}/#{repos.first['name']}.git #{e_sh install_bundles_path}/#{e_sh bundle_name}.tmbundle 2>&1]
-              end
-            end
-      
-      res = %x{#{cmd}}
-      
-      puts cmd, res.gsub(/^/,'    ')
-      
-      installed=true and break if res =~ /Checked out revision|Initialized empty Git repository/
+    case remotes.values.flatten.length
+      when 0 then abort("Unknown bundle: #{bundle}")
+      when 1 then local.install(bundle, remotes.keys.detect { |k| remotes[k].length == 1 })
+      else
+        puts "Please select a bundle from the following list:"
+        puts
+        i = 0
+        bundle_index = {}
+        remotes.each do |remote, bundles|
+          puts remote
+          puts '-' * remote.length
+          bundles.each do |bundle|
+            bundle_index[i += 1] = [bundle, remote]
+            puts "#{i}. #{bundle}"
+          end
+          puts
+        end
+        index = ask('Which bundle would you like to install?').to_i
+        if bundle_index[index]
+          local.install(*bundle_index[index]) 
+        else
+          abort("Unknown option: #{index}")
+        end
     end
-    abort 'Not Installed' unless installed
-    
-    reload :verbose => true
+
+    reload
   end
 
   desc "uninstall NAME", "uninstall a bundle"
-  def uninstall(bundle_name)
+  def uninstall(bundle)
     puts "Removing bundle..."
-    # When moving to the trash, maybe move the bundle into a trash/disabled_bundles subfolder 
-    #   named as the bundles_path key. Just in case there are multiple versions of 
-    #     the same bundle in multiple bundle paths
-    local_bundle_paths.each do |name,bundles_path|
-      bundle_path = "#{bundles_path}/#{bundle_name}.tmbundle"
-      if File.exist? bundle_path
-        %x[osascript -e 'tell application "Finder" to move the POSIX file "#{bundle_path}" to trash']
-      end
-    end
-    
-    reload :verbose => true
+    local.uninstall(bundle)
+    reload
   end
-  
+
   desc "reload", "Reloads TextMate Bundles"
-  method_options :verbose => :boolean
-  def reload(opts = {})
-    puts "Reloading bundles..." if opts[:verbose]
-    %x[osascript -e 'tell app "TextMate" to reload bundles']
-    puts "Done." if opts[:verbose]
-  end
-  
-  private
-  def remote_bundle_locations
-    { :'Macromates Trunk'  => {:scm => :svn, :url => 'http://svn.textmate.org/trunk/Bundles'},
-      :'Macromates Review' => {:scm => :svn, :url => 'http://svn.textmate.org/trunk/Review/Bundles'},
-      
-      # :'Bunch of Git Bundles' => {:scm => :git, :url => 'git://NotImplemented'},
-      
-      :'GitHub' => {:scm => :github, :url => 'http://github.com/search?q=tmbundle'},
-    }
-  end
-  
-  def local_bundle_paths
-    { :Application       => '/Applications/TextMate.app/Contents/SharedSupport/Bundles',
-      :User              => "#{ENV["HOME"]}/Library/Application Support/TextMate/Bundles",
-      :System            => '/Library/Application Support/TextMate/Bundles',
-      :'User Pristine'   => "#{ENV["HOME"]}/Library/Application Support/TextMate/Pristine Copy/Bundles",
-      :'System Pristine' => '/Library/Application Support/TextMate/Pristine Copy/Bundles',
-    }
-  end
-  
-  def install_bundles_path
-    local_bundle_paths[:'User Pristine']
-  end
-  
-  # Copied from http://macromates.com/svn/Bundles/trunk/Support/lib/escape.rb
-  # escape text to make it useable in a shell script as one “word” (string)
-  def e_sh(str)
-  	str.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\x7F-\xFF\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
-  end
-  
-  CAPITALIZATION_EXCEPTIONS = %w[tmbundle on]
-  # Convert a GitHub repo name into a "normal" TM bundle name
-  # e.g. ruby-on-rails-tmbundle => Ruby on Rails.tmbundle
-  def normalize_github_repo_name(name)
-    name = name.gsub("-", " ").split.each{|part| part.capitalize! unless CAPITALIZATION_EXCEPTIONS.include? part}.join(" ")
-    name[-9] = ?. if name =~ / tmbundle$/
-    name
-  end
-  
-  # Does the opposite of normalize_github_repo_name
-  def denormalize_github_repo_name(name)
-    name += " tmbundle" unless name =~ / tmbundle$/
-    name.split(' ').each{|part| part.downcase!}.join(' ').gsub(' ', '-')
-  end
-  
-  def find_github_bundles(search_term)
-    # Until GitHub fixes http://support.github.com/discussions/feature-requests/11-api-search-results,
-    # we need to account for multiple pages of results:
-    page = 1
-    repositories = YAML.load(open("http://github.com/api/v1/yaml/search/tmbundle?start_value=#{page}"))['repositories']
-    results = []
-    until repositories.empty?
-      results += repositories.find_all{|result| result['name'].match(search_term)}
-      page += 1
-      repositories = YAML.load(open("http://github.com/api/v1/yaml/search/tmbundle?start_value=#{page}"))['repositories']
-    end
-    results.sort{|a,b| a['name'] <=> b['name']}
-  end
-  
-  def git_url_from_github_result(result)
-    "git://github.com/#{result['username']}/#{result['name']}.git"
+  def reload
+    puts "Reloading bundles..."
+    %x{ osascript -e 'tell app "TextMate" to reload bundles' }
   end
 
 end
 
-# TODO: create a "monument to personal cleverness" by class-izing everything?
-# class TextMateBundle
-#   def self.find_local(bundle_name)
-#     
-#   end
-#   
-#   def self.find_remote(bundle_name)
-#     
-#   end
-#   attr_reader :name
-#   attr_reader :location
-#   attr_reader :scm
-#   def initialize(name, location, scm)
-#     @name     = name
-#     @location = location
-#     @scm      = scm
-#   end
-#   
-#   def install!
-#     
-#   end
-#   
-#   def uninstall!
-#     
-#   end
-#   
-#   
-#   def installed?
-#     # List all the installed versions, and where they're at
-#   end
-#   
-#   # TODO: dirty? method to show if there are any deltas
-# end
+def local
+  @local ||= Textmate::Local.new
+end
+
+def remote
+  @remote ||= Textmate::Remote.new
+end
+
+def display_hash(hash)
+  puts
+  hash.keys.sort.each do |key|
+    value = hash[key]
+    puts key
+    puts '-' * key.length
+    case value
+      when Array then puts value.join("\n") unless value.empty?
+      else            puts value
+    end
+    puts
+  end
+end
 
 TextmateInstaller.start
