@@ -10,7 +10,7 @@ begin
     gem.email = "<ddollar@gmail.com>"
     gem.homepage = "http://github.com/ddollar/textmate"
     gem.authors = ["David Dollar"]
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.add_runtime_dependency 'thor', '>= 0.11.5'
   end
 
 rescue LoadError
