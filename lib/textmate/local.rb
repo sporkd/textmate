@@ -1,12 +1,19 @@
 class Textmate::Local
 
   def self.bundle_paths
-    { 'Application'     => '/Applications/TextMate.app/Contents/SharedSupport/Bundles',
+    bundle_paths = {
+      'Application'     => '/Applications/TextMate.app/Contents/SharedSupport/Bundles',
       'User'            => "#{ENV["HOME"]}/Library/Application Support/TextMate/Bundles",
       'System'          => '/Library/Application Support/TextMate/Bundles',
       'User Pristine'   => "#{ENV["HOME"]}/Library/Application Support/TextMate/Pristine Copy/Bundles",
       'System Pristine' => '/Library/Application Support/TextMate/Pristine Copy/Bundles',
     }
+
+    # specific to my setup
+    shell_subsystem_dir = "#{ENV["HOME"]}/.bash/config/textmate.d"
+    bundle_paths['User Pristine'] = shell_subsystem_dir if File.exist?(shell_subsystem_dir)
+
+    bundle_paths
   end
 
   def self.bundle_install_path
