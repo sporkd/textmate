@@ -23,7 +23,8 @@ class Textmate::Local
 
   def bundles(search = '')
     bundle_paths.inject({}) do |hash, (name, path)|
-      hash.update(name => find_bundles(name, search))
+      hash[name] = find_bundles(name, search) if File.exist?(path)
+      hash
     end
   end
 
