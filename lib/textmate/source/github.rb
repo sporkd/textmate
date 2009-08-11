@@ -59,7 +59,7 @@ private ######################################################################
 
   def install_bundle_from_github(repository, bundle)
     around_install(bundle) do
-      %x{ git clone "#{git_clone_url(repository)}" "#{local_path_for(bundle)}" }
+      %x{ git clone --depth 1 "#{git_clone_url(repository)}" "#{local_path_for(bundle)}" }
     end
   end
 
