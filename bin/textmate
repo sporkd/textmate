@@ -17,7 +17,7 @@ class TextmateInstaller < Thor
     display_hash local.bundles(search)
   end
 
-  desc "install NAME [SOURCE]", "install a bundle"
+  desc "install NAME", "install a bundle"
   def install(bundle)
     remotes = remote.bundles(bundle)
 

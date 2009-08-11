@@ -58,12 +58,9 @@ List all of the bundles that are installed on the local system, optionally filte
 
 ## Installing new bundles
 
-`textmate install NAME [SOURCE]`
+`textmate install NAME`
 
-Installs a bundle from the remote repository. SOURCE filters known remote bundle locations.
-For example, if you want to install the "Ruby on Rails" bundle off GitHub, you'd type the following:
-
-`textmate install "Ruby on Rails" GitHub`
+Installs a bundle from a remote repository.
 
 Available remote bundle locations are:
 * Macromates Trunk
