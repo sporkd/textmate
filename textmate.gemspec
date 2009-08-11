@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{textmate}
-  s.version = "1.0.1"
+  s.version = "1.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Dollar"]
-  s.date = %q{2009-08-10}
+  s.date = %q{2009-08-11}
   s.default_executable = %q{textmate}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{<ddollar@gmail.com>}
@@ -46,10 +46,16 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<thor>, [">= 0.11.5"])
+      s.add_runtime_dependency(%q<fcoury-octopi>, [">= 0.1.0"])
+      s.add_runtime_dependency(%q<httparty>, [">= 0.4.4"])
     else
       s.add_dependency(%q<thor>, [">= 0.11.5"])
+      s.add_dependency(%q<fcoury-octopi>, [">= 0.1.0"])
+      s.add_dependency(%q<httparty>, [">= 0.4.4"])
     end
   else
     s.add_dependency(%q<thor>, [">= 0.11.5"])
+    s.add_dependency(%q<fcoury-octopi>, [">= 0.1.0"])
+    s.add_dependency(%q<httparty>, [">= 0.4.4"])
   end
 end
