@@ -35,7 +35,7 @@ private ######################################################################
   end
 
   def select_repository(repositories)
-    puts "Please select a repository from the following list:"
+    puts "Please select a repository from the following list: (CTRL-C to exit)"
     puts
     repository_index = {}
     repositories.inject(0) do |index, repository|

@@ -69,7 +69,7 @@ def display_hash(hash)
 end
 
 def select_remote(remotes)
-  puts "Please select a bundle from the following list:"
+  puts "Please select a bundle from the following list: (CTRL-C to exit)"
   puts
   bundle_index = {}
   remotes.keys.sort.inject(0) do |index, remote|
