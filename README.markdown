@@ -2,7 +2,7 @@
 
 A binary that provides package management for TextMate.
 
-# Installation
+# Install
 
 `gem install ddollar-textmate`
 
