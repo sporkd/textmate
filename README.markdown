@@ -2,6 +2,10 @@
 
 A binary that provides package management for TextMate.
 
+# Installation
+
+`gem install ddollar-textmate`
+
 # Example
 
     $ textmate install javascript
