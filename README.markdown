@@ -5,6 +5,7 @@ A binary that provides package management for TextMate.
 # Example
 
     $ textmate install javascript
+
     Please select a bundle from the following list:
 
     Github
