@@ -1,6 +1,6 @@
 class Textmate::Local
 
-  def bundle_paths
+  def self.bundle_paths
     { 'Application'     => '/Applications/TextMate.app/Contents/SharedSupport/Bundles',
       'User'            => "#{ENV["HOME"]}/Library/Application Support/TextMate/Bundles",
       'System'          => '/Library/Application Support/TextMate/Bundles',
@@ -9,14 +9,26 @@ class Textmate::Local
     }
   end
 
-  def bundle_install_path
+  def self.bundle_install_path
     bundle_paths['User Pristine']
+  end
+
+  def bundle_paths
+    self.class.bundle_paths
+  end
+
+  def bundle_install_path
+    self.class.bundle_install_path
   end
 
   def bundles(search = '')
     bundle_paths.inject({}) do |hash, (name, path)|
       hash.update(name => find_bundles(name, search))
     end
+  end
+
+  def install(bundle, remote)
+    remote.install(bundle)
   end
 
   def uninstall(bundle)

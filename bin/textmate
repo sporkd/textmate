@@ -20,30 +20,11 @@ class TextmateInstaller < Thor
   desc "install NAME [SOURCE]", "install a bundle"
   def install(bundle)
     remotes = remote.bundles(bundle)
-    
+
     case remotes.values.flatten.length
       when 0 then abort("Unknown bundle: #{bundle}")
       when 1 then local.install(bundle, remotes.keys.detect { |k| remotes[k].length == 1 })
-      else
-        puts "Please select a bundle from the following list:"
-        puts
-        i = 0
-        bundle_index = {}
-        remotes.each do |remote, bundles|
-          puts remote
-          puts '-' * remote.length
-          bundles.each do |bundle|
-            bundle_index[i += 1] = [bundle, remote]
-            puts "#{i}. #{bundle}"
-          end
-          puts
-        end
-        index = ask('Which bundle would you like to install?').to_i
-        if bundle_index[index]
-          local.install(*bundle_index[index]) 
-        else
-          abort("Unknown option: #{index}")
-        end
+      else        local.install(*select_remote(remotes))
     end
 
     reload
@@ -76,6 +57,7 @@ def display_hash(hash)
   puts
   hash.keys.sort.each do |key|
     value = hash[key]
+    key = key.name if key.respond_to?(:name)
     puts key
     puts '-' * key.length
     case value
@@ -84,6 +66,29 @@ def display_hash(hash)
     end
     puts
   end
+end
+
+def select_remote(remotes)
+  puts "Please select a bundle from the following list:"
+  puts
+  bundle_index = {}
+  remotes.keys.sort.inject(0) do |index, remote|
+    bundles = remotes[remote]
+    puts remote.name
+    puts '-' * remote.name.length
+    bundles.each do |bundle|
+      bundle_index[index += 1] = [bundle, remote]
+      puts "#{index}. #{bundle}"
+    end
+    puts
+    index
+  end
+
+  index = ask('Which bundle would you like to install?').to_i
+  puts
+  abort("Unknown option: #{index}") unless bundle_index[index]
+
+  bundle_index[index]
 end
 
 TextmateInstaller.start

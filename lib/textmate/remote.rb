@@ -14,7 +14,7 @@ class Textmate::Remote
 
   def bundles(search = '')
     sources.inject({}) do |hash, source|
-      hash.update(source.name => source.bundles(search))
+      hash.update(source => source.bundles(search))
     end
   end
 
