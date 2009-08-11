@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{textmate}
-  s.version = "0.9.8"
+  s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Dollar"]
@@ -25,6 +25,13 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "bin/textmate",
+     "lib/textmate.rb",
+     "lib/textmate/local.rb",
+     "lib/textmate/remote.rb",
+     "lib/textmate/source.rb",
+     "lib/textmate/source/base.rb",
+     "lib/textmate/source/github.rb",
+     "lib/textmate/source/macromates.rb",
      "textmate.gemspec"
   ]
   s.homepage = %q{http://github.com/ddollar/textmate}
