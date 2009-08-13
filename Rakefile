@@ -6,7 +6,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "textmate"
     gem.summary = %Q{Command-line package manager for textmate}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.description = gem.summary
     gem.email = "<ddollar@gmail.com>"
     gem.homepage = "http://github.com/ddollar/textmate"
     gem.authors = ["David Dollar"]
