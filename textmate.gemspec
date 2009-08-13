@@ -5,13 +5,13 @@
 
 Gem::Specification.new do |s|
   s.name = %q{textmate}
-  s.version = "1.2.0"
+  s.version = "1.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Dollar"]
-  s.date = %q{2009-08-11}
+  s.date = %q{2009-08-13}
   s.default_executable = %q{textmate}
-  s.description = %q{TODO: longer description of your gem}
+  s.description = %q{Command-line package manager for textmate}
   s.email = %q{<ddollar@gmail.com>}
   s.executables = ["textmate"]
   s.extra_rdoc_files = [
