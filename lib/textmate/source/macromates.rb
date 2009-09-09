@@ -26,7 +26,7 @@ private ######################################################################
   def repository_bundles(repository, search = '', match = :partial)
     search_term = Regexp.new(".*#{search}.*", 'i')
 
-    %x{ svn list #{repository} }.map do |bundle|
+    %x{ svn list #{repository} }.split.map do |bundle|
       bundle.split('.').first
     end.select do |bundle|
       match == :partial ? bundle =~ search_term : bundle == search
