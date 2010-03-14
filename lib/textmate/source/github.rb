@@ -25,13 +25,14 @@ private ######################################################################
   CAPITALIZATION_EXCEPTIONS = %w[tmbundle on]
 
   def github_search(bundle)
-    Octopi::Repository.find_all(bundle, 'tmbundle')
+    # GitHub API bug: we have to use '%20' instead of '+' for string concatenation
+    search_string = "(#{bundle}_ AND ((tmbundle) OR (textmate bundle) OR (tm bundle)))".gsub(/ /, "%20")
+    Octopi::Repository.find_all(search_string)
   end
 
   def normalize_github_repo_name(name)
     name = name.gsub("-", " ").split.each{|part| part.capitalize! unless CAPITALIZATION_EXCEPTIONS.include? part}.join(" ")
-    name[-9] = ?. if name =~ / tmbundle$/
-    name
+    name = name.gsub(/_*(tm.*bundles*|textmate.*bundles*|textmate)/i, "")
   end
 
   def select_repository(repositories)
