@@ -11,7 +11,7 @@ begin
     gem.homepage = "http://github.com/ddollar/textmate"
     gem.authors = ["David Dollar"]
     gem.add_runtime_dependency 'thor',          '>= 0.11.5'
-    gem.add_runtime_dependency 'fcoury-octopi', '>= 0.1.0'
+    gem.add_runtime_dependency 'octopi', '>= 0.1.0'
     gem.add_runtime_dependency 'httparty',      '>= 0.4.4'
   end
 

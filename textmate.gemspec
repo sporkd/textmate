@@ -46,16 +46,16 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<thor>, [">= 0.11.5"])
-      s.add_runtime_dependency(%q<fcoury-octopi>, [">= 0.1.0"])
+      s.add_runtime_dependency(%q<octopi>, [">= 0.1.0"])
       s.add_runtime_dependency(%q<httparty>, [">= 0.4.4"])
     else
       s.add_dependency(%q<thor>, [">= 0.11.5"])
-      s.add_dependency(%q<fcoury-octopi>, [">= 0.1.0"])
+      s.add_dependency(%q<octopi>, [">= 0.1.0"])
       s.add_dependency(%q<httparty>, [">= 0.4.4"])
     end
   else
     s.add_dependency(%q<thor>, [">= 0.11.5"])
-    s.add_dependency(%q<fcoury-octopi>, [">= 0.1.0"])
+    s.add_dependency(%q<octopi>, [">= 0.1.0"])
     s.add_dependency(%q<httparty>, [">= 0.4.4"])
   end
 end
