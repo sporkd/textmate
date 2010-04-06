@@ -40,7 +40,7 @@ class TextmateInstaller < Thor
   desc "reload", "Reloads TextMate Bundles"
   def reload
     puts "Reloading bundles..."
-    %x{ osascript -e 'tell app "TextMate" to reload bundles' }
+    %x{ arch -i386 osascript -e 'tell app "TextMate" to reload bundles' }
   end
 
 end

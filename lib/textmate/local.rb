@@ -43,7 +43,7 @@ class Textmate::Local
     bundle_paths.values.each do |path|
       bundle_path = File.join(path, "#{bundle}.tmbundle")
       if File.exist? bundle_path
-        %x[osascript -e 'tell application "Finder" to move the POSIX file "#{bundle_path}" to trash']
+        %x[arch -i386 osascript -e 'tell application "Finder" to move the POSIX file "#{bundle_path}" to trash']
       end
     end
   end
